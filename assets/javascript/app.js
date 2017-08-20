@@ -6,30 +6,35 @@
 //if incorrect answer, add to incorrect counter
 //if correct, add to correct counter
 
-var correct;
-var incorrect;
-var unanswered;
+var correct = 0;
+var incorrect = 0;
+var unanswered = 0;
 var qNum = 0;
+var state;
 
 var questions = [
   {
-    q: "What is my question?",
-    a1: "answer1",
-    a2: "answer2",
-    a3: "answer3",
-    a4: "answer4"
+    q: "Why does this look like crap?",
+    a1: "Because a bootcamp while working OT was a dumb idea",
+    a2: "Because I should have chosen the easier assignment",
+    a3: "Because I wear too many hats",
+    a4: "All of the above"
   },
   {
-    q: "What is my next question?",
-    a1: "answer1b",
-    a2: "answer2b",
-    a3: "answer3b",
-    a4: "answer4b"
+    q: "Why can't you submit an answer?",
+    a1: "Because I spent all my time making sure the timers worked",
+    a2: "Because I couldn't figure out how to tag them in-/correct",
+    a3: "42",
+    a4: "I'm all out of clever non-answers"
   }
 ];
+var answers = [
+  "Trick question because you can't submit a choice anyway!!",
+  "Seriously, I should have just done the easier one, and I would have been golden."
+]
 
 //timer code
-var time = 30;
+var time = 20;
 var intervalId;
 
 function run() {
@@ -46,40 +51,55 @@ function decrement() {
   if (time === 0) {
     $("#clock").html("<h1>0</h1>");
     stop();
-    unanswered++;
-    showCorrect();
+    if (state === "question") {
+      unanswered++;
+      showCorrect();
+    } else {
+      nextQuestion();
+    }
   }
 };
 
 //function to create answer radio buttons
 function addAnswers(a) {
-  var answer = $("<form>")
-  .append("<div class='radio'>")
+  var answer = $("<div class='radio'>")
   .append("<label>")
   .append("<input type='radio' name='optradio'>" + " " + a);
-  $("#startQA").append(answer);
+  $("#choices").append(answer);
 }
 
 //function to clear panel and add next question
 function nextQuestion() {
-  time = 30;
-  $("#startQA").empty();
-  $("#startQA").append(questions[qNum].q);
-  addAnswers(questions[qNum].a1);
-  addAnswers(questions[qNum].a2);
-  addAnswers(questions[qNum].a3);
-  addAnswers(questions[qNum].a4);
-  //begin timer
-  run();
-  //iterate question number
-  qNum++;
+  if (qNum < questions.length) {
+    state= "question";
+    time = 20;
+    $("#startQA").empty();
+    $("#startQA").append("<h2>" + questions[qNum].q + "</h2>");
+    $("#startQA").append("<form id='choices'>");
+    addAnswers(questions[qNum].a1);
+    addAnswers(questions[qNum].a2);
+    addAnswers(questions[qNum].a3);
+    addAnswers(questions[qNum].a4);
+    //begin timer
+    run();
+  } else {
+    finalScore();
+  }
 }
 
 function showCorrect() {
-  time = 10;
+  state = "answer";
+  time = 5;
   $("#startQA").empty();
-  $("#startQA").append("Here is the correct answer!!");
-  nextQuestion();
+  $("#startQA").append(answers[qNum]);
+  run();
+  qNum++;
+}
+
+function finalScore() {
+  $("#startQA").append("<p>Correct: " + correct + "</p>");
+  $("#startQA").append("<p>Incorrect: " + incorrect + "</p>");
+  $("#startQA").append("<p>Unanswered: " + unanswered + "</p>");
 }
 
 $("#start-game").on("click", function() {
